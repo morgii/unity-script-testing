@@ -35,6 +35,7 @@ public class playerController : MonoBehaviour
     {
         
         playerMove();
+        playerJump();
         mouseLook();
         shoot();
     }
@@ -59,6 +60,15 @@ public class playerController : MonoBehaviour
             playerTransform.forward = new Vector3(movementVector.x, 0, movementVector.z).normalized;
         }
     }
+
+    void playerJump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Jumped!");
+        }
+    }
+
 
     void mouseLook()
     {
