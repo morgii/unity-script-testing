@@ -1,27 +1,50 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class SimpleCharacterController : MonoBehaviour
 {
-    private Transform playerTransform;
-    private Material playerMaterial;
-    void Start()
+    [SerializeField] private float moveSpeed = 4f;
+    [SerializeField] private float acceleration = 4f;
+    [SerializeField] private float jumpForce = 1.5f;
+    [SerializeField] private float gravity = 9.81f;
+
+    private CharacterController _controller;
+    private float rotationSpeed;
+    private float _verticalVelocity;
+    private Vector3 currentMove;
+
+    private void Awake()
     {
-        playerTransform = GetComponent<Transform>();
-        playerMaterial = GetComponent<Renderer>().material;
-        Color randomColor = new Color(Random.value, Random.value, Random.value);
-        playerMaterial.SetColor("_Color", randomColor);
+        if (!TryGetComponent(out _controller))
+            Debug.LogError("Couldn't get the CharacterController", this);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        Vector2 movement2d = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        Vector3 playerMovement = new Vector3(movement2d.x, 0, movement2d.y).normalized;
-        playerTransform.Translate(playerMovement * Time.deltaTime * 5f, Space.World);
-        Debug.Log("Update running");
+        if (!_controller)
+            return;
 
+        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        Vector3 targetMove = new Vector3(input.x, 0, input.y).normalized;
 
+        currentMove = Vector3.Lerp(currentMove, targetMove, acceleration * Time.deltaTime);
+
+        if (_controller.isGrounded)
+            _verticalVelocity = -gravity * Time.deltaTime;
+        else
+            _verticalVelocity -= gravity * Time.deltaTime;
+
+        if (Input.GetKeyDown(KeyCode.Space) && _controller.isGrounded)
+            _verticalVelocity = jumpForce;
+
+        currentMove.y = _verticalVelocity;
+        _controller.Move(currentMove * (moveSpeed * Time.deltaTime));
+
+        if (input != Vector2.zero)
+        {
+            float targetAngle = Mathf.Atan2(currentMove.x, currentMove.z) * Mathf.Rad2Deg;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref rotationSpeed, 0.1f);
+            transform.rotation = Quaternion.Euler(0, angle, 0);
+        }
     }
 }
