@@ -4,7 +4,6 @@
  *                    REST API Action Package
  * ═══════════════════════════════════════════════════════════════
  * 
- * Version: 1.0.0
  * Author: Unity Forge
  * Github: https://github.com/unityforgedev
  * 
